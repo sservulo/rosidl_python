@@ -45,7 +45,7 @@ foreach(_typesupport_impl ${_typesupport_impls})
   set(_generated_extension_${_typesupport_impl}_files "")
 endforeach()
 
-foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
+foreach(_idl_file ${rosidl_generate_action_interfaces_IDL_FILES})
   get_filename_component(_parent_folder "${_idl_file}" DIRECTORY)
   get_filename_component(_parent_folder "${_parent_folder}" NAME)
   get_filename_component(_msg_name1 "${_idl_file}" NAME_WE)

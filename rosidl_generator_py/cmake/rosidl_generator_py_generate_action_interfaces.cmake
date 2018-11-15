@@ -32,7 +32,7 @@ if(_typesupport_impls STREQUAL "")
 endif()
 
 set(_output_path
-  "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_py/${PROJECT_NAME}")
+  "${CMAKE_CURRENT_BINARY_DIR}/rosidl_python/${PROJECT_NAME}")
 set(_generated_files "")
 
 foreach(_idl_file ${rosidl_generate_action_interfaces_IDL_FILES})
@@ -95,7 +95,7 @@ rosidl_write_generator_arguments(
   TARGET_DEPENDENCIES ${target_dependencies}
 )
 
-get_used_typesupports(typesupports "rosidl_generator_py")
+get_used_typesupports(typesupports "rosidl_python")
 add_custom_command(
   OUTPUT ${_generated_files}
   COMMAND ${PYTHON_EXECUTABLE} ${rosidl_generator_py_BIN}

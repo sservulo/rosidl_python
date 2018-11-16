@@ -26,7 +26,7 @@ find_package(PythonExtra MODULE REQUIRED)
 # Get a list of typesupport implementations from valid rmw implementations.
 rosidl_generator_py_get_typesupports(_typesupports)
 
-if(_typesupport_impls STREQUAL "")
+if(_typesupports STREQUAL "")
   message(WARNING "No valid typesupport for Python generator. Python messages will not be generated.")
   return()
 endif()
@@ -53,6 +53,15 @@ foreach(_idl_file ${rosidl_generate_action_interfaces_IDL_FILES})
     "${_output_path}/${_parent_folder}/_${_module_name}_action.py"
   )
 endforeach()
+
+# python block
+if(NOT _generated_files STREQUAL "")
+  list(GET _generated_files 0 _action_file)
+  get_filename_component(_parent_folder "${_action_file}" DIRECTORY)
+  list(APPEND _generated_files
+    "${_parent_folder}/__init__.py"
+  )
+endif()
 
 set(_dependency_files "")
 set(_dependencies "")
@@ -118,75 +127,73 @@ endif()
 target_compile_definitions(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
   PRIVATE "ROSIDL_GENERATOR_C_BUILDING_DLL_${PROJECT_NAME}_ACTION")
 
-set_target_properties(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-  PROPERTIES CXX_STANDARD 14)
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set_target_properties(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-    PROPERTIES COMPILE_OPTIONS -Wall -Wextra -Wpedantic)
-endif()
-target_include_directories(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-  PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_c
-)
-target_link_libraries(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-  ${rosidl_generate_action_interfaces_TARGET}__rosidl_generator_c)
-# Add dependency to type support library for generated msg and srv for actions
-target_link_libraries(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-  ${rosidl_generate_action_interfaces_TARGET}__rosidl_typesupport_c)
+# set_target_properties(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#   PROPERTIES CXX_STANDARD 14)
+# if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+#   set_target_properties(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#     PROPERTIES COMPILE_OPTIONS -Wall -Wextra -Wpedantic)
+# endif()
+# target_include_directories(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#   PUBLIC
+#   ${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_c
+# )
+# target_link_libraries(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#   ${rosidl_generate_action_interfaces_TARGET}__rosidl_generator_c)
+# # Add dependency to type support library for generated msg and srv for actions
+# target_link_libraries(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#   ${rosidl_generate_action_interfaces_TARGET}__rosidl_typesupport_c)
 
-# if only a single typesupport is used this package will directly reference it
-# therefore it needs to link against the selected typesupport
-if(NOT typesupports MATCHES ";")
-  target_include_directories(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-    PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/${typesupports}")
-  target_link_libraries(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-    ${rosidl_generate_action_interfaces_TARGET}__${typesupports})
-else()
-  if("${rosidl_typesupport_c_LIBRARY_TYPE}" STREQUAL "STATIC")
-    message(FATAL_ERROR "Multiple typesupports but static linking was requested")
-  endif()
-  if(NOT rosidl_typesupport_c_SUPPORTS_POCO)
-    message(FATAL_ERROR "Multiple typesupports but Poco was not available when "
-      "rosidl_typesupport_c was built")
-  endif()
-endif()
+# # if only a single typesupport is used this package will directly reference it
+# # therefore it needs to link against the selected typesupport
+# if(NOT typesupports MATCHES ";")
+#   target_include_directories(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#     PUBLIC
+#     "${CMAKE_CURRENT_BINARY_DIR}/${typesupports}")
+#   target_link_libraries(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#     ${rosidl_generate_action_interfaces_TARGET}__${typesupports})
+# else()
+#   if("${rosidl_typesupport_c_LIBRARY_TYPE}" STREQUAL "STATIC")
+#     message(FATAL_ERROR "Multiple typesupports but static linking was requested")
+#   endif()
+#   if(NOT rosidl_typesupport_c_SUPPORTS_POCO)
+#     message(FATAL_ERROR "Multiple typesupports but Poco was not available when "
+#       "rosidl_typesupport_c was built")
+#   endif()
+# endif()
 
-ament_target_dependencies(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-  "rosidl_generator_c"
-  "rosidl_typesupport_c"
-  "rosidl_typesupport_interface")
-foreach(_pkg_name ${rosidl_generate_action_interfaces_DEPENDENCY_PACKAGE_NAMES})
-  ament_target_dependencies(
-    ${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-    ${_pkg_name})
-endforeach()
+# ament_target_dependencies(${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#   "rosidl_generator_c"
+#   "rosidl_typesupport_c"
+#   "rosidl_typesupport_interface")
+# foreach(_pkg_name ${rosidl_generate_action_interfaces_DEPENDENCY_PACKAGE_NAMES})
+#   ament_target_dependencies(
+#     ${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#     ${_pkg_name})
+# endforeach()
 
-add_dependencies(
-  ${rosidl_generate_action_interfaces_TARGET}
-  ${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-)
-# Depend on generated headers for C type support
-add_dependencies(
-  ${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-  ${rosidl_generate_action_interfaces_TARGET}__c__actions
-)
+# add_dependencies(
+#   ${rosidl_generate_action_interfaces_TARGET}
+#   ${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+# )
+# # Depend on generated headers for C type support
+# add_dependencies(
+#   ${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#   ${rosidl_generate_action_interfaces_TARGET}__c__actions
+# )
 
-if(NOT rosidl_generate_action_interfaces_SKIP_INSTALL)
-  install(
-    TARGETS ${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-  )
-  ament_export_libraries(${rosidl_generate_action_interfaces_TARGET}${_target_suffix})
-endif()
+# if(NOT rosidl_generate_action_interfaces_SKIP_INSTALL)
+#   install(
+#     TARGETS ${rosidl_generate_action_interfaces_TARGET}${_target_suffix}
+#     ARCHIVE DESTINATION lib
+#     LIBRARY DESTINATION lib
+#     RUNTIME DESTINATION bin
+#   )
+#   ament_export_libraries(${rosidl_generate_action_interfaces_TARGET}${_target_suffix})
+# endif()
 
 if(BUILD_TESTING AND rosidl_generate_interfaces_ADD_LINTER_TESTS)
-  if(
-    NOT _generated_action_c_files STREQUAL "" OR
-    NOT _generated_action_py_files STREQUAL ""
-  )
+  if(NOT _generatedfiles STREQUAL "")
+    # c tests?
     find_package(ament_cmake_cppcheck REQUIRED)
     ament_cppcheck(
       TESTNAME "cppcheck_rosidl_generated_action_interfaces_py"

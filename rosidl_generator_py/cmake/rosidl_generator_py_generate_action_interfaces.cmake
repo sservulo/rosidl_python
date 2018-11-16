@@ -24,7 +24,7 @@ find_package(python_cmake_module REQUIRED)
 find_package(PythonExtra MODULE REQUIRED)
 
 # Get a list of typesupport implementations from valid rmw implementations.
-rosidl_generator_py_get_typesupports(_typesupport_impls)
+rosidl_generator_py_get_typesupports(_typesupports)
 
 if(_typesupport_impls STREQUAL "")
   message(WARNING "No valid typesupport for Python generator. Python messages will not be generated.")
@@ -32,7 +32,7 @@ if(_typesupport_impls STREQUAL "")
 endif()
 
 set(_output_path
-  "${CMAKE_CURRENT_BINARY_DIR}/rosidl_python/${PROJECT_NAME}")
+  "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_py/${PROJECT_NAME}")
 set(_generated_files "")
 
 foreach(_idl_file ${rosidl_generate_action_interfaces_IDL_FILES})
@@ -49,7 +49,7 @@ foreach(_idl_file ${rosidl_generate_action_interfaces_IDL_FILES})
   endif()
   get_filename_component(_msg_name "${_idl_file}" NAME_WE)
   string_camel_case_to_lower_case_underscore("${_msg_name}" _header_name)
-  list(APPEND _generated_action_py_files
+  list(APPEND _generated_files
     "${_output_path}/${_parent_folder}/_${_module_name}_action.py"
   )
 endforeach()
@@ -95,12 +95,12 @@ rosidl_write_generator_arguments(
   TARGET_DEPENDENCIES ${target_dependencies}
 )
 
-get_used_typesupports(typesupports "rosidl_python")
+# get_used_typesupports(typesupports "rosidl_python")
 add_custom_command(
   OUTPUT ${_generated_files}
   COMMAND ${PYTHON_EXECUTABLE} ${rosidl_generator_py_BIN}
   --generator-arguments-file "${generator_arguments_file}"
-  --typesupports ${typesupports}
+  --typesupports ${_typesupports}
   DEPENDS ${target_dependencies}
   COMMENT "Generating Python type support dispatch for ROS action interfaces"
   VERBATIM

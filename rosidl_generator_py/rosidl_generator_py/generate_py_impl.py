@@ -48,6 +48,10 @@ def generate_py(generator_arguments_file, typesupport_impls):
     mapping_actions = {
         os.path.join(template_dir, '_action.py.em'): ['_%s.py'],
     }
+    mapping_actions_extension = {
+        os.path.join(template_dir, '_action_typesupport_entry_point.c.em'):
+        type_support_impl_by_filename.keys(),
+    }
 
     for template_file in mapping_msgs.keys():
         assert os.path.exists(template_file), 'Could not find template: ' + template_file
@@ -56,6 +60,8 @@ def generate_py(generator_arguments_file, typesupport_impls):
     for template_file in mapping_srvs.keys():
         assert os.path.exists(template_file), 'Could not find template: ' + template_file
     for template_file in mapping_actions.keys():
+        assert os.path.exists(template_file), 'Could not find template: ' + template_file
+    for template_file in mapping_actions_extension.keys():
         assert os.path.exists(template_file), 'Could not find template: ' + template_file
 
     functions = {
@@ -127,9 +133,22 @@ def generate_py(generator_arguments_file, typesupport_impls):
         for generated_filename in generated_filenames:
             data = {
                 'package_name': args['package_name'],
-                'action_specs': action_specs,
                 'message_specs': message_specs,
                 'service_specs': service_specs,
+                'typesupport_impl': type_support_impl_by_filename.get(generated_filename, ''),
+            }
+            data.update(functions)
+            generated_file = os.path.join(
+                args['output_dir'], generated_filename % args['package_name'])
+            expand_template(
+                template_file, data, generated_file,
+                minimum_timestamp=latest_target_timestamp)
+
+    for template_file, generated_filenames in mapping_actions_extension.items():
+        for generated_filename in generated_filenames:
+            data = {
+                'package_name': args['package_name'],
+                'action_specs': action_specs,
                 'typesupport_impl': type_support_impl_by_filename.get(generated_filename, ''),
             }
             data.update(functions)

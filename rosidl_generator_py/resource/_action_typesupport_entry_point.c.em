@@ -55,7 +55,6 @@ ROSIDL_TYPESUPPORT_INTERFACE__ACTION_SYMBOL_NAME(rosidl_typesupport_c, @(spec.pk
 int8_t
 _register_action_type__@(subfolder)__@(type_name)(PyObject * pymodule)
 {
-  int8_t err;
   PyObject * pyobject_@(function_name) = NULL;
   pyobject_@(function_name) = PyCapsule_New(
     (void *)ROSIDL_TYPESUPPORT_INTERFACE__ACTION_SYMBOL_NAME(rosidl_typesupport_c, @(spec.pkg_name), @(subfolder), @(spec.action_name))(),
@@ -64,7 +63,7 @@ _register_action_type__@(subfolder)__@(type_name)(PyObject * pymodule)
     // previously added objects will be removed when the module is destroyed
     return -1;
   }
-  err = PyModule_AddObject(
+  int8_t err = PyModule_AddObject(
     pymodule,
     "@(function_name)_action__@(subfolder)_@(type_name)",
     pyobject_@(function_name));
@@ -86,12 +85,12 @@ PyInit_@(package_name)_s__@(typesupport_impl)(void)
   if (!pymodule) {
     return NULL;
   }
-  int8_t err;
+
 @[for spec, subfolder in action_specs]@
 @{
 type_name = convert_camel_case_to_lower_case_underscore(spec.action_name)
 }@
-  err = _register_action_type__@(subfolder)__@(type_name)(pymodule);
+  int8_t err = _register_action_type__@(subfolder)__@(type_name)(pymodule);
   if (err) {
     Py_XDECREF(pymodule);
     return NULL;
